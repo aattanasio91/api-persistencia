@@ -3,23 +3,22 @@ var router = express.Router();
 var models = require("../models");
 
 router.get("/", (req, res) => {
-  models.alumno
+  models.profesor
     .findAll({
-      attributes: ["id", "nombre", "id_carrera"],
-      include:[{as:'Carrera-Relacionada', model:models.carrera, attributes: ["id","nombre"]}],
-      offset: req.query.paginaActual, limit: req.query.cantidadAVer
+      attributes: ["id", "nombre", "id_materia"],
+      include:[{as:'Materia-Relacionada', model:models.materia, attributes: ["id","nombre"]}]
     })
-    .then(alumnos => res.send(alumnos))
+    .then(profesores => res.send(profesores))
     .catch(() => res.sendStatus(500));
 });
 
 router.post("/", (req, res) => {
-  models.alumno
+  models.profesor
     .create({ nombre: req.body.nombre, id_carrera: req.body.id_carrera })
-    .then(alumno => res.status(201).send({ id: alumno.id }))
+    .then(profesor => res.status(201).send({ id: profesor.id }))
     .catch(error => {
       if (error == "SequelizeUniqueConstraintError: Validation error") {
-        res.status(400).send('Bad request: existe otra alumno con el mismo nombre')
+        res.status(400).send('Bad request: existe otra profesor con el mismo nombre')
       }
       else {
         console.log(`Error al intentar insertar en la base de datos: ${error}`)
@@ -28,39 +27,39 @@ router.post("/", (req, res) => {
     });
 });
 
-const findalumno = (id, { onSuccess, onNotFound, onError }) => {
-  models.alumno
+const findprofesor = (id, { onSuccess, onNotFound, onError }) => {
+  models.profesor
     .findOne({
       attributes: ["id", "nombre", "id_carrera"],
       where: { id }
     })
-    .then(alumno => (alumno ? onSuccess(alumno) : onNotFound()))
+    .then(profesor => (profesor ? onSuccess(profesor) : onNotFound()))
     .catch(() => onError());
 };
 
 router.get("/:id", (req, res) => {
-  findalumno(req.params.id, {
-    onSuccess: alumno => res.send(alumno),
+  findprofesor(req.params.id, {
+    onSuccess: profesor => res.send(profesor),
     onNotFound: () => res.sendStatus(404),
     onError: () => res.sendStatus(500)
   });
 });
 
 router.put("/:id", (req, res) => {
-  const onSuccess = alumno =>
-    alumno
+  const onSuccess = profesor =>
+    profesor
       .update({ nombre: req.body.nombre, id_carrera: req.body.id_carrera }, { fields: ["nombre", "id_carrera"] })
       .then(() => res.sendStatus(200))
       .catch(error => {
         if (error == "SequelizeUniqueConstraintError: Validation error") {
-          res.status(400).send('Bad request: existe otra alumno con el mismo nombre')
+          res.status(400).send('Bad request: existe otra profesor con el mismo nombre')
         }
         else {
           console.log(`Error al intentar actualizar la base de datos: ${error}`)
           res.sendStatus(500)
         }
       });
-    findalumno(req.params.id, {
+    findprofesor(req.params.id, {
     onSuccess,
     onNotFound: () => res.sendStatus(404),
     onError: () => res.sendStatus(500)
@@ -68,12 +67,12 @@ router.put("/:id", (req, res) => {
 });
 
 router.delete("/:id", (req, res) => {
-  const onSuccess = alumno =>
-    alumno
+  const onSuccess = profesor =>
+    profesor
       .destroy()
       .then(() => res.sendStatus(200))
       .catch(() => res.sendStatus(500));
-  findalumno(req.params.id, {
+  findprofesor(req.params.id, {
     onSuccess,
     onNotFound: () => res.sendStatus(404),
     onError: () => res.sendStatus(500)
