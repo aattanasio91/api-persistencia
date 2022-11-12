@@ -8,7 +8,7 @@ var materiasRouter = require('./routes/materias');
 var alumnosRouter = require('./routes/alumnos');
 var profesoresRouter = require('./routes/profesores');
 var usuariosRouter = require('./routes/usuarios');
-
+var loginRouter = require('./routes/login');
 var app = express();
 
 const jwt = require('jsonwebtoken');
@@ -55,7 +55,8 @@ app.use('/car', verificacion, carrerasRouter);
 app.use('/mat', verificacion, materiasRouter);
 app.use('/alu', verificacion, alumnosRouter);
 app.use('/pro', verificacion, profesoresRouter);
-app.use('/user', usuariosRouter);
+app.use('/user', verificacion, usuariosRouter);
+app.use('/login', loginRouter);
 
 
 app.use(function(req, res, next) {

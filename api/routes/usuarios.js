@@ -10,36 +10,11 @@ const keys = require('../settings/keys');
 
 app.set('key', keys.key);
 
-router.post('/login', (req, res) => {
-    findusuario(req.body.usuario, {
-        onSuccess: usuario =>  validate(usuario, req, res),
-        onNotFound: () => res.send('Usuario y/ password incorrecta.'),
-        onError: () => res.sendStatus(500)
-      });
-});
-
-const validate = (usuario, req, res) => {
-    if(req.body.usuario == usuario.usuario && req.body.pass == usuario.pass){
-        console.log(router)
-        const payload = {
-          check: true
-        };
-        const token = jwt.sign(payload, app.get('key'), {
-          expiresIn:'5m'
-        });
-        res.json({
-          message:'¡AUTENTICACION EXITOSA',
-          token: token
-        });
-    }else{
-        res.json({
-          message:'Usuario y/ password incorrecta.'
-        });
-    }
-};
 
 router.post("/altausuario", (req, res) => {
-  models.usuario
+  findusuario(req.body.usuario, {
+    onSuccess: () => res.send('El usuario ya existe'),
+    onNotFound: () => models.usuario
     .create({ usuario: req.body.usuario, pass: req.body.pass })
     .then(usuario => res.status(201).send({ id: usuario.id }))
     .catch(error => {
@@ -50,7 +25,9 @@ router.post("/altausuario", (req, res) => {
         console.log(`Error al intentar insertar en la base de datos: ${error}`)
         res.sendStatus(500)
       }
-    });
+    }),
+    onError: () => res.sendStatus(500)
+  });
 });
 
 const findusuario = (usuario, { onSuccess, onNotFound, onError }) => {
