@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 var models = require("../models");
-const usuario = require("../models/usuario");
 
 var app = express();
 

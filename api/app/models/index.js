@@ -1,11 +1,12 @@
 'use strict';
-
+const express = require('express')
+const router = express.Router()
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
+const config = require('../../config/config.json')[env];
 const db = {};
 
 let sequelize;
@@ -30,6 +31,11 @@ Object.keys(db).forEach(modelName => {
     db[modelName].associate(db);
   }
 });
+
+router.get('*', (req, res) => {
+  res.status(404)
+  res.send({ error: 'Not found' })
+})
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

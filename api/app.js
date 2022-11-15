@@ -3,18 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var carrerasRouter = require('./routes/carreras');
-var materiasRouter = require('./routes/materias');
-var alumnosRouter = require('./routes/alumnos');
-var profesoresRouter = require('./routes/profesores');
-var usuariosRouter = require('./routes/usuarios');
-var loginRouter = require('./routes/login');
+var carrerasRouter = require('./app/routes/carreras');
+var materiasRouter = require('./app/routes/materias');
+var alumnosRouter = require('./app/routes/alumnos');
+var profesoresRouter = require('./app/routes/profesores');
+var usuariosRouter = require('./app/routes/usuarios');
+var loginRouter = require('./app/routes/login');
+
+
 var app = express();
 
-const jwt = require('jsonwebtoken');
-const keys = require('./settings/keys');
 
-app.set('key', keys.key);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,36 +25,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const verificacion = express.Router();
-
-verificacion.use((req, res, next) => {
-  let token = req.headers['x-access-token'] || req.headers['authorization'];
-  if(!token){
-    res.status(401).send({
-      error: 'Es necesario un token de autenticación'
-    })
-    return
-  }
-  if(token.startsWith('Bearer ')){
-    token = token.slice(7, token.length);
-  }
-  jwt.verify(token, app.get('key'), (error, decoded) => {
-    if(error){
-      return res.json({
-        message: 'El token no es valido'
-      });
-    }else{
-      req.decoded = decoded;
-      next();
-    }
-  })
-})
-
-app.use('/car', verificacion, carrerasRouter);
-app.use('/mat', verificacion, materiasRouter);
-app.use('/alu', verificacion, alumnosRouter);
-app.use('/pro', verificacion, profesoresRouter);
-app.use('/user', verificacion, usuariosRouter);
+app.use('/car', carrerasRouter);
+app.use('/mat', materiasRouter);
+app.use('/alu', alumnosRouter);
+app.use('/pro', profesoresRouter);
+app.use('/user', usuariosRouter);
 app.use('/login', loginRouter);
 
 

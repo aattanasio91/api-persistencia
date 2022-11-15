@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var models = require("../models");
+const logger = require('../utils/logger');
 
 router.get("/", (req, res) => {
   models.profesor
@@ -19,9 +20,10 @@ router.post("/", (req, res) => {
     .catch(error => {
       if (error == "SequelizeUniqueConstraintError: Validation error") {
         res.status(400).send('Bad request: existe otra profesor con el mismo nombre')
+        logger.error(`Bad request: existe otro profesor con el mismo nombre`)
       }
       else {
-        console.log(`Error al intentar insertar en la base de datos: ${error}`)
+        logger.error(`Error al intentar insertar en la base de datos: ${error}`)
         res.sendStatus(500)
       }
     });
@@ -53,9 +55,10 @@ router.put("/:id", (req, res) => {
       .catch(error => {
         if (error == "SequelizeUniqueConstraintError: Validation error") {
           res.status(400).send('Bad request: existe otra profesor con el mismo nombre')
+          logger.error(`Bad request: existe otro profesor con el mismo nombre`)
         }
         else {
-          console.log(`Error al intentar actualizar la base de datos: ${error}`)
+          logger.error(`Error al intentar insertar en la base de datos: ${error}`)
           res.sendStatus(500)
         }
       });
