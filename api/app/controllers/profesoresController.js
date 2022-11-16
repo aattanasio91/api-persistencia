@@ -2,10 +2,10 @@ var models = require("../models");
 const logger = require('../utils/logger');
 
 const getProfesores = (req, res) => {
-    return models.profesor
+  return models.profesor
     .findAll({
       attributes: ["id", "nombre", "id_materia"],
-      include:[{as:'Materia-Relacionada', model:models.materia, attributes: ["id","nombre"]}]
+      include: [{ as: 'Materia-Relacionada', model: models.materia, attributes: ["id", "nombre"] }]
     })
     .then(profesores => res.send(profesores))
     .catch(() => res.sendStatus(500));
@@ -20,8 +20,8 @@ const getProfesorById = (req, res) => {
 }
 
 const insertProfesor = (req, res) => {
-    models.profesor
-    .create({ nombre: req.body.nombre, id_carrera: req.body.id_carrera })
+  models.profesor
+    .create({ nombre: req.body.nombre, id_materia: req.body.id_materia })
     .then(profesor => res.status(201).send({ id: profesor.id }))
     .catch(error => {
       if (error == "SequelizeUniqueConstraintError: Validation error") {
@@ -36,7 +36,7 @@ const insertProfesor = (req, res) => {
 }
 
 const updateProfesor = (req, res) => {
-    const onSuccess = profesor =>
+  const onSuccess = profesor =>
     profesor
       .update({ nombre: req.body.nombre, id_carrera: req.body.id_carrera }, { fields: ["nombre", "id_carrera"] })
       .then(() => res.sendStatus(200))
@@ -50,7 +50,7 @@ const updateProfesor = (req, res) => {
           res.sendStatus(500)
         }
       });
-    findProfesor(req.params.id, {
+  findProfesor(req.params.id, {
     onSuccess,
     onNotFound: () => res.sendStatus(404),
     onError: () => res.sendStatus(500)
@@ -58,8 +58,9 @@ const updateProfesor = (req, res) => {
 }
 
 const deleteProfesor = (req, res) => {
-    const onSuccess = profesor =>
-    profesor
+  logger.info('Borrando usuario');
+  const onSuccess = profesor =>
+  profesor
       .destroy()
       .then(() => res.sendStatus(200))
       .catch(() => res.sendStatus(500));
@@ -71,9 +72,10 @@ const deleteProfesor = (req, res) => {
 }
 
 const findProfesor = (id, { onSuccess, onNotFound, onError }) => {
-    models.profesor
+  models.profesor
     .findOne({
-      attributes: ["id", "nombre", "id_carrera"],
+      attributes: ["id", "nombre", "id_materia"],
+      include: [{ as: 'Materia-Relacionada', model: models.materia, attributes: ["id", "nombre"] }],
       where: { id }
     })
     .then(profesor => (profesor ? onSuccess(profesor) : onNotFound()))
@@ -81,9 +83,9 @@ const findProfesor = (id, { onSuccess, onNotFound, onError }) => {
 };
 
 module.exports = {
-    getProfesores,
-    getProfesorById,
-    insertProfesor,
-    updateProfesor,
-    deleteProfesor
+  getProfesores,
+  getProfesorById,
+  insertProfesor,
+  updateProfesor,
+  deleteProfesor
 }

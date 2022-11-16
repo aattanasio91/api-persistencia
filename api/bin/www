@@ -3,6 +3,7 @@
 /**
  * Module dependencies.
  */
+const logger = require('../app/utils/logger');
 
 var app = require('../app');
 var debug = require('debug')('api:server');
@@ -87,4 +88,6 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+  logger.info('---- APLICACION LISTA ----');
+  logger.info('Escuchando en puerto: ' + addr.port);
 }

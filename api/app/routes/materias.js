@@ -1,7 +1,5 @@
 var express = require("express");
 var router = express.Router();
-var models = require("../models");
-const logger = require('../utils/logger');
 const { getMaterias, getMateriaById, insertMateria, updateMateria, deleteMateria } = require('../controllers/materiasController');
 const checkAuth = require('../middleware/auth');
 const { validateCreate } = require('../validators/materiasValidator')

@@ -4,7 +4,7 @@ var models = require("../models");
 const logger = require('../utils/logger');
 const { getProfesores, getProfesorById, insertProfesor, updateProfesor, deleteProfesor } = require('../controllers/profesoresController');
 const checkAuth = require('../middleware/auth');
-const { validateCreate } = require('../validators/alumnosValidator')
+const { validateCreate } = require('../validators/profesoresValidator')
 
 router
     .get("/", checkAuth , getProfesores)

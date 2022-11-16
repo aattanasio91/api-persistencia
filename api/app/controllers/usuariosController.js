@@ -10,7 +10,7 @@ const keys = require('../settings/keys');
 app.set('key', keys.key);
 
 const altaUsuario = (req, res) => {
-    findUsuario(req.body.usuario, {
+    findUsuarioByName(req.body.usuario, {
         onSuccess: () => res.send('El usuario ya existe'),
         onNotFound: () => models.usuario
             .create({ usuario: req.body.usuario, pass: req.body.pass })
@@ -30,7 +30,7 @@ const altaUsuario = (req, res) => {
 }
 
 const getUsuario = (req, res) => {
-    findUsuario(req.params.usuario, {
+    findUsuarioById(req.params.usuario, {
         onSuccess: usuario => res.send(usuario),
         onNotFound: () => res.sendStatus(404),
         onError: () => res.sendStatus(500)
@@ -43,7 +43,7 @@ const deleteUsuario = (req, res) => {
             .destroy()
             .then(() => res.sendStatus(200))
             .catch(() => res.sendStatus(500));
-    findUsuario(req.params.id, {
+    findUsuarioById(req.params.id, {
         onSuccess,
         onNotFound: () => res.sendStatus(404),
         onError: () => res.sendStatus(500)
@@ -65,18 +65,28 @@ const updateUsuario = (req, res) => {
                     res.sendStatus(500)
                 }
             });
-    findUsuario(req.params.id, {
+    findUsuarioById(req.params.id, {
         onSuccess,
         onNotFound: () => res.sendStatus(404),
         onError: () => res.sendStatus(500)
     });
 }
 
-const findUsuario = (usuario, { onSuccess, onNotFound, onError }) => {
+const findUsuarioByName = (usuario, { onSuccess, onNotFound, onError }) => {
     models.usuario
         .findOne({
             attributes: ["usuario", "pass"],
             where: { usuario }
+        })
+        .then(usuario => (usuario ? onSuccess(usuario) : onNotFound()))
+        .catch(() => onError());
+};
+
+const findUsuarioById = (id, { onSuccess, onNotFound, onError }) => {
+    models.usuario
+        .findOne({
+            attributes: ["id", "usuario", "pass"],
+            where: { id }
         })
         .then(usuario => (usuario ? onSuccess(usuario) : onNotFound()))
         .catch(() => onError());

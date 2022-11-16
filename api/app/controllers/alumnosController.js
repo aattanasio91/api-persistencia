@@ -2,9 +2,10 @@ var models = require("../models");
 const logger = require('../utils/logger');
 
 const getAlumnos = (req, res) => {
+    logger.info('Consultando usuarios');
     return models.alumno
     .findAll({
-      attributes: ["id", "nombre", "id_carrera"],
+      attributes: ["id", "nombre", "dni","id_carrera"],
       include:[{as:'Carrera-Relacionada', model:models.carrera, attributes: ["id","nombre"]}],
       offset: req.query.paginaActual, limit: req.query.cantidadAVer
     })
@@ -21,8 +22,9 @@ const getAlumnoById = (req, res) => {
 }
 
 const insertAlumno = (req, res) => {
+  logger.info('Insertando usuario');
   models.alumno
-    .create({ nombre: req.body.nombre, id_carrera: req.body.id_carrera })
+    .create({ nombre: req.body.nombre, dni:req.body.dni, id_carrera: req.body.id_carrera })
     .then(alumno => res.status(201).send({ id: alumno.id }))
     .catch(error => {
       if (error == "SequelizeUniqueConstraintError: Validation error") {
@@ -37,10 +39,11 @@ const insertAlumno = (req, res) => {
 }
 
 const updateAlumno = (req, res) => {
+  logger.info('Actualizando usuario');
   const onSuccess = alumno =>
     alumno
-      .update({ nombre: req.body.nombre, id_carrera: req.body.id_carrera }, { fields: ["nombre", "id_carrera"] })
-      .then(() => res.sendStatus(200))
+      .update({ nombre: req.body.nombre, dni: req.body.dni, id_carrera: req.body.id_carrera }, { fields: ["nombre", "dni", "id_carrera"] })
+      .then(() => res.sendStatus(200), logger.info('Alumno borrado'))
       .catch(error => {
         if (error == "SequelizeUniqueConstraintError: Validation error") {
           res.status(400).send('Bad request: existe otra alumno con el mismo nombre')
@@ -59,10 +62,11 @@ const updateAlumno = (req, res) => {
 }
 
 const deleteAlumno = (req, res) => {
+  logger.info('Borrando usuario');
   const onSuccess = alumno =>
     alumno
       .destroy()
-      .then(() => res.sendStatus(200))
+      .then(() => res.sendStatus(200), logger.info('Alumno borrado'))
       .catch(() => res.sendStatus(500));
   findAlumno(req.params.id, {
     onSuccess,
@@ -74,7 +78,8 @@ const deleteAlumno = (req, res) => {
 const findAlumno = (id, { onSuccess, onNotFound, onError }) => {
   models.alumno
     .findOne({
-      attributes: ["id", "nombre", "id_carrera"],
+      attributes: ["id", "nombre", "dni","id_carrera"],
+      include:[{as:'Carrera-Relacionada', model:models.carrera, attributes: ["id","nombre"]}],
       where: { id }
     })
     .then(alumno => (alumno ? onSuccess(alumno) : onNotFound()))
