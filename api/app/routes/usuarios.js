@@ -1,88 +1,13 @@
 var express = require("express");
 var router = express.Router();
-var models = require("../models");
-const usuario = require("../models/usuario");
-const logger = require('../utils/logger');
+const { getUsuario, altaUsuario, updateUsuario, deleteUsuario } = require('../controllers/usuariosController');
+const { validateCreate } = require('../validators/usuariosValidator');
+const checkAuth = require('../middleware/auth');
 
-var app = express();
-
-const jwt = require('jsonwebtoken');
-const keys = require('../settings/keys');
-
-app.set('key', keys.key);
-
-
-router.post("/altausuario", (req, res) => {
-  findusuario(req.body.usuario, {
-    onSuccess: () => res.send('El usuario ya existe'),
-    onNotFound: () => models.usuario
-    .create({ usuario: req.body.usuario, pass: req.body.pass })
-    .then(usuario => res.status(201).send({ id: usuario.id }))
-    .catch(error => {
-      if (error == "SequelizeUniqueConstraintError: Validation error") {
-        res.status(400).send('Bad request: existe otra usuario con el mismo nombre')
-        logger.error(`Bad request: existe otro usuario con el mismo nombre`)
-      }
-      else {
-        logger.error(`Error al intentar insertar en la base de datos: ${error}`)
-        res.sendStatus(500)
-      }
-    }),
-    onError: () => res.sendStatus(500)
-  });
-});
-
-const findusuario = (usuario, { onSuccess, onNotFound, onError }) => {
-  models.usuario
-    .findOne({
-      attributes: ["usuario", "pass"],
-      where: { usuario }
-    })
-    .then(usuario => (usuario ? onSuccess(usuario) : onNotFound()))
-    .catch(() => onError());
-};
-
-router.put("/:id", (req, res) => {
-  const onSuccess = usuario =>
-    usuario
-      .update({ usuario: req.body.usuario, pass: req.body.pass }, { fields: ["usuario", "pass"] })
-      .then(() => res.sendStatus(200))
-      .catch(error => {
-        if (error == "SequelizeUniqueConstraintError: Validation error") {
-          res.status(400).send('Bad request: existe otra usuario con el mismo nombre')
-          logger.error(`Bad request: existe otro usuario con el mismo nombre`)
-        }
-        else {
-          logger.error(`Error al intentar actualizar la base de datos: ${error}`)
-          res.sendStatus(500)
-        }
-      });
-    findusuario(req.params.id, {
-    onSuccess,
-    onNotFound: () => res.sendStatus(404),
-    onError: () => res.sendStatus(500)
-  });
-});
-
-router.get("/:usuario", (req, res) => {
-    findusuario(req.params.usuario, {
-      onSuccess: usuario => res.send(usuario),
-      onNotFound: () => res.sendStatus(404),
-      onError: () => res.sendStatus(500)
-    });
-  });
-
-router.delete("/:id", (req, res) => {
-  const onSuccess = usuario =>
-    usuario
-      .destroy()
-      .then(() => res.sendStatus(200))
-      .catch(() => res.sendStatus(500));
-  findusuario(req.params.id, {
-    onSuccess,
-    onNotFound: () => res.sendStatus(404),
-    onError: () => res.sendStatus(500)
-  });
-});
+router
+  .post("/altausuario", checkAuth, validateCreate, altaUsuario)
+  .put("/:id", checkAuth, updateUsuario)
+  .get("/:usuario", checkAuth, getUsuario)
+  .delete("/:id", checkAuth, deleteUsuario);
 
 module.exports = router;

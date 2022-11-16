@@ -6,14 +6,11 @@ const { getProfesores, getProfesorById, insertProfesor, updateProfesor, deletePr
 const checkAuth = require('../middleware/auth');
 const { validateCreate } = require('../validators/alumnosValidator')
 
-router.get("/", checkAuth , getProfesores);
-
-router.get("/:id", checkAuth , getProfesorById);
-
-router.post("/", checkAuth , validateCreate , insertProfesor);
-
-router.put("/:id", checkAuth , updateProfesor);
-
-router.delete("/:id", checkAuth , deleteProfesor);
+router
+    .get("/", checkAuth , getProfesores)
+    .get("/:id", checkAuth , getProfesorById)
+    .post("/", checkAuth , validateCreate , insertProfesor)
+    .put("/:id", checkAuth , updateProfesor)
+    .delete("/:id", checkAuth , deleteProfesor);
 
 module.exports = router;

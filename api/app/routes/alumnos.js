@@ -4,14 +4,12 @@ const { getAlumnos, getAlumnoById, insertAlumno, updateAlumno, deleteAlumno } = 
 const checkAuth = require('../middleware/auth');
 const { validateCreate } = require('../validators/alumnosValidator')
 
-router.get("/", checkAuth , getAlumnos);
 
-router.get("/:id", checkAuth , getAlumnoById);
-
-router.post("/", checkAuth , validateCreate , insertAlumno);
-
-router.put("/:id", checkAuth , updateAlumno);
-
-router.delete("/:id", checkAuth , deleteAlumno);
+router
+    .get("/", checkAuth , getAlumnos)
+    .get("/:id", checkAuth , getAlumnoById)
+    .post("/", checkAuth , validateCreate , insertAlumno)
+    .put("/:id", checkAuth , updateAlumno)
+    .delete("/:id", checkAuth , deleteAlumno);
 
 module.exports = router;
